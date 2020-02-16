@@ -4,12 +4,15 @@
     "main": "index.js",
     "license": "MIT",
     "scripts": {
-        "start": "parcel src/index.html"
+        "start": "parcel src/index.html",
+        "build": "parcel build --public-url https://m4rc3l05.github.io/js-calendar/ src/index.html",
+        "gh-pages": "node scripts/publishToGHPages.js"
     },
     "devDependencies": {
         "@babel/core": "^7.0.0-0",
         "@babel/plugin-proposal-class-properties": "^7.8.3",
         "@babel/plugin-transform-runtime": "^7.8.3",
+        "gh-pages": "^2.2.0",
         "parcel": "^1.12.4"
     }
 }
