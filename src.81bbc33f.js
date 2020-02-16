@@ -25,4 +25,4 @@ function e(e,r,n){return r in e?Object.defineProperty(e,r,{value:n,enumerable:!0
 },{"./styles.css":"Tnu0","./Controller":"pjvy","./Model":"Wni6","./View":"GD3f"}],"Focm":[function(require,module,exports) {
 "use strict";require("./styles.css");var e=require("./calendar");(0,e.Calendar)(document.getElementById("calendar"));
 },{"./styles.css":"Tnu0","./calendar":"Ptuc"}]},{},["Focm"], null)
-//# sourceMappingURL=https://m4rc3l05.github.io/src.81bbc33f.js.map
+//# sourceMappingURL=https://m4rc3l05.github.io/js-calendar/src.81bbc33f.js.map
