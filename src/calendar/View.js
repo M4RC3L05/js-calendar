@@ -59,31 +59,6 @@ export class View {
     async init() {
         this.initRenderApp();
         this.populateCalendarDom();
-
-        this.bindEvents();
-    }
-
-    bindEvents() {
-        this.CalendarDOM.calendarPrev.addEventListener(
-            "click",
-            this.controller.moveCalendarPrev
-        );
-        this.CalendarDOM.calendarNext.addEventListener(
-            "click",
-            this.controller.moveCalendarNext
-        );
-        this.CalendarDOM.manageEventModal.close.addEventListener(
-            "click",
-            this.controller.onEventManagerClose
-        );
-        this.CalendarDOM.manageEventModal.delete.addEventListener(
-            "click",
-            this.controller.deleteEvent
-        );
-        this.CalendarDOM.manageEventModal.ok.addEventListener(
-            "click",
-            this.controller.onEventManagerConfirm
-        );
     }
 
     initRenderApp() {

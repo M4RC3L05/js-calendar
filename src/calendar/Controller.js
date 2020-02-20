@@ -29,6 +29,31 @@ export class Controller {
         this.view.bindController(this);
         await this.view.init();
         this.view.render(this.model.state);
+
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        this.view.CalendarDOM.calendarPrev.addEventListener(
+            "click",
+            this.moveCalendarPrev
+        );
+        this.view.CalendarDOM.calendarNext.addEventListener(
+            "click",
+            this.moveCalendarNext
+        );
+        this.view.CalendarDOM.manageEventModal.close.addEventListener(
+            "click",
+            this.onEventManagerClose
+        );
+        this.view.CalendarDOM.manageEventModal.delete.addEventListener(
+            "click",
+            this.deleteEvent
+        );
+        this.view.CalendarDOM.manageEventModal.ok.addEventListener(
+            "click",
+            this.onEventManagerConfirm
+        );
     }
 
     onEventManagerConfirm() {

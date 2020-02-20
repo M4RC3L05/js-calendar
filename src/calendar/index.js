@@ -9,7 +9,9 @@ import { View } from "./View";
  * @param {HTMLElement} rootEle
  *
  */
-export function Calendar(rootEle) {
+export async function Calendar(rootEle) {
     const ctl = new Controller(new Model(), new View(rootEle));
-    return ctl.init();
+    await ctl.init();
+
+    return ctl;
 }
