@@ -16,17 +16,15 @@ export class Controller {
 
         this.moveCalendarNext = this.moveCalendarNext.bind(this);
         this.moveCalendarPrev = this.moveCalendarPrev.bind(this);
-        this.manageEvent = this.manageEvent.bind(this);
-        this.deleteEvent = this.deleteEvent.bind(this);
-        this.toggleCreateMode = this.toggleCreateMode.bind(this);
-        this.enableCreateMode = this.enableCreateMode.bind(this);
+        this.onDeleteEvent = this.onDeleteEvent.bind(this);
         this.onEventManagerConfirm = this.onEventManagerConfirm.bind(this);
         this.onEventManagerClose = this.onEventManagerClose.bind(this);
+        this.onShowCreateModal = this.onShowCreateModal.bind(this);
+        this.onShowEditModal = this.onShowEditModal.bind(this);
     }
 
     async init() {
         await this.model.init();
-        this.view.bindController(this);
         await this.view.init();
         this.view.render(this.model.state);
 
@@ -34,56 +32,83 @@ export class Controller {
     }
 
     bindEvents() {
-        this.view.CalendarDOM.calendarPrev.addEventListener(
-            "click",
-            this.moveCalendarPrev
-        );
-        this.view.CalendarDOM.calendarNext.addEventListener(
-            "click",
-            this.moveCalendarNext
-        );
-        this.view.CalendarDOM.manageEventModal.close.addEventListener(
-            "click",
-            this.onEventManagerClose
-        );
-        this.view.CalendarDOM.manageEventModal.delete.addEventListener(
-            "click",
-            this.deleteEvent
-        );
-        this.view.CalendarDOM.manageEventModal.ok.addEventListener(
-            "click",
-            this.onEventManagerConfirm
-        );
+        this.view
+            .findDOMById("calendarPrev")
+            .addEventListener("click", this.moveCalendarPrev);
+        this.view
+            .findDOMById("calendarNext")
+            .addEventListener("click", this.moveCalendarNext);
+        this.view
+            .findDOMById("modalClose")
+            .addEventListener("click", this.onEventManagerClose);
+        this.view
+            .findDOMById("modalDelete")
+            .addEventListener("click", this.onDeleteEvent);
+        this.view
+            .findDOMById("modalOk")
+            .addEventListener("click", this.onEventManagerConfirm);
+        this.view
+            .findDOMById("calendarBody")
+            .addEventListener("click", this.onShowCreateModal);
+
+        this.view
+            .findDOMById("calendarBody")
+            .addEventListener("dblclick", this.onShowEditModal);
+    }
+
+    onShowCreateModal(e) {
+        if (this.model.state.isManageModalOpen) return;
+        if (!e.target.classList.contains("add-event")) return;
+
+        const curr = e.target.parentNode.querySelector(".numDay");
+        const now = new Date();
+
+        this.view.findDOMById("modalInputDate").valueAsNumber = new Date(
+            this.model.state.viewingDate.getFullYear(),
+            this.model.state.viewingDate.getMonth(),
+            Number(curr.textContent),
+            now.getHours(),
+            now.getMinutes()
+        ).getTime();
+        this.model.setEventToManage(undefined);
+        this.model.setShouldManageModalBeOpen(true);
+        this.view.renderManageEventModal(this.model.state);
+    }
+
+    onShowEditModal(e) {
+        if (this.model.state.isManageModalOpen) return;
+        if (!e.target.hasAttribute("eventId")) return;
+
+        const eventId = String(e.target.getAttribute("eventId"));
+
+        this.model.setEventToManage(eventId);
+        this.model.setShouldManageModalBeOpen(true);
+        this.view.renderManageEventModal(this.model.state);
     }
 
     onEventManagerConfirm() {
-        if (
-            !!this.model.state.createMode ===
-            !!this.model.state.currEventToManageId
-        )
-            return;
-
-        const description = this.view.CalendarDOM.manageEventModal
-            .inputDescription.value;
-        const at = new Date(
-            this.view.CalendarDOM.manageEventModal.inputDate.value
-        );
+        const description = this.view.findDOMById("modalInputDescription")
+            .value;
+        const at = new Date(this.view.findDOMById("modalInputDate").value);
         if (this.model.state.currEventToManageId) {
-            this.model.updateEvent({ description, at });
-            this.model.toggleEventToManage(undefined);
+            this.model.updateEvent(this.model.state.currEventToManageId, {
+                description,
+                at
+            });
         } else {
             this.model.createEvent({ description, at });
-            this.toggleCreateMode();
         }
+
+        this.model.setEventToManage(undefined);
+        this.model.setShouldManageModalBeOpen(false);
 
         this.view.renderManageEventModal(this.model.state);
         this.view.renderCalendar(this.model.state);
     }
 
     onEventManagerClose() {
-        if (this.model.state.createMode) this.model.toggleCreateMode();
-        else this.model.toggleEventToManage(undefined);
-
+        this.model.setEventToManage(undefined);
+        this.model.setShouldManageModalBeOpen(false);
         this.view.renderManageEventModal(this.model.state);
     }
 
@@ -98,39 +123,14 @@ export class Controller {
         this.view.renderCalendar(this.model.state);
     }
 
-    manageEvent(id) {
-        if (this.model.state.createMode) return;
-
-        this.model.toggleEventToManage(id);
-        this.view.renderManageEventModal(this.model.state);
-    }
-
-    enableCreateMode() {
-        if (this.model.state.currEventToManageId) return;
-
-        this.model.toggleCreateMode();
-        this.view.renderManageEventModal(this.model.state);
-    }
-
-    deleteEvent() {
-        if (this.model.state.createMode) return;
+    onDeleteEvent() {
         if (!this.model.state.currEventToManageId) return;
+        const id = this.model.state.currEventToManageId;
+        this.model.deleteEvent(this.model.state.currEventToManageId);
+        this.model.setEventToManage(undefined);
+        this.model.setShouldManageModalBeOpen(false);
 
-        this.model.deleteEvent();
-        this.model.toggleEventToManage(undefined);
-
-        this.view.renderCalendar(this.model.state);
+        this.view.removeEvent(id);
         this.view.renderManageEventModal(this.model.state);
-    }
-
-    toggleCreateMode() {
-        if (this.model.state.currEventToManageId) return;
-
-        this.model.toggleCreateMode();
-        this.view.renderManageEventModal(this.model.state);
-    }
-
-    getState() {
-        return this.model.state;
     }
 }

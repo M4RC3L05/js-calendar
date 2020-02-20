@@ -1,61 +1,7 @@
 import { months, firstDay, daysInMonth } from "../utils";
+import { AbstractView } from "../core/AbstractView";
 
-export class View {
-    /** @type {import("./Controller").Controller} */
-    controller;
-
-    /** @type {HTMLElement} */
-    rootEle;
-
-    CalendarDOM = {
-        /** @type {HTMLElement} */
-        calendarTable: undefined,
-        /** @type {HTMLElement} */
-        calendarHead: undefined,
-        /** @type {HTMLElement} */
-        calendarBody: undefined,
-        /** @type {HTMLElement} */
-        calendarPrev: undefined,
-        /** @type {HTMLElement} */
-        calendarNext: undefined,
-        /** @type {HTMLElement} */
-        calendarCurrDate: undefined,
-        manageEventModal: {
-            /** @type {HTMLElement} */
-            modal: undefined,
-            /** @type {HTMLElement} */
-            close: undefined,
-            /** @type {HTMLElement} */
-            inputDescription: undefined,
-            /** @type {HTMLElement} */
-            inputDate: undefined,
-            /** @type {HTMLElement} */
-            eventIdShow: undefined,
-            /** @type {HTMLElement} */
-            ok: undefined,
-            /** @type {HTMLElement} */
-            delete: undefined
-        }
-    };
-
-    /**
-     *
-     * @param {HTMLElement} rootEle
-     *
-     */
-    constructor(rootEle) {
-        this.rootEle = rootEle;
-    }
-
-    /**
-     *
-     * @param {import("./Controller").Controller} ctl
-     *
-     */
-    bindController(ctl) {
-        this.controller = ctl;
-    }
-
+export class View extends AbstractView {
     async init() {
         this.initRenderApp();
         this.populateCalendarDom();
@@ -114,40 +60,40 @@ export class View {
             </tbody>
         </table>`;
 
-        this.rootEle.parentNode.replaceChild(rootDiv, this.rootEle);
-        this.rootEle = rootDiv;
+        this.rootElement.parentNode.replaceChild(rootDiv, this.rootElement);
+        this.rootElement = rootDiv;
     }
 
     populateCalendarDom() {
-        this.CalendarDOM = {
-            calendarTable: this.rootEle.querySelector(".calendar-table"),
-            calendarHead: this.rootEle.querySelector(".calendar-head"),
-            calendarBody: this.rootEle.querySelector(".calendar-body"),
-            calendarPrev: this.rootEle.querySelector(".calendar-prev"),
-            calendarNext: this.rootEle.querySelector(".calendar-next"),
-            calendarCurrDate: this.rootEle.querySelector(".calendar-currDate"),
-            manageEventModal: {
-                modal: this.rootEle.querySelector(".calendar-manage-event"),
-                close: this.rootEle
-                    .querySelector(".calendar-manage-event")
-                    .querySelector(".close"),
-                inputDescription: this.rootEle
-                    .querySelector(".calendar-manage-event")
-                    .querySelector("#descricao"),
-                inputDate: this.rootEle
-                    .querySelector(".calendar-manage-event")
-                    .querySelector("#date"),
-                eventIdShow: this.rootEle
-                    .querySelector(".calendar-manage-event")
-                    .querySelector(".event-id"),
-                ok: this.rootEle
-                    .querySelector(".calendar-manage-event")
-                    .querySelector("#ok"),
-                delete: this.rootEle
-                    .querySelector(".calendar-manage-event")
-                    .querySelector("#eliminar")
-            }
-        };
+        this.setAllToDom({
+            calendarTable: this.rootElement.querySelector(".calendar-table"),
+            calendarHead: this.rootElement.querySelector(".calendar-head"),
+            calendarBody: this.rootElement.querySelector(".calendar-body"),
+            calendarPrev: this.rootElement.querySelector(".calendar-prev"),
+            calendarNext: this.rootElement.querySelector(".calendar-next"),
+            calendarCurrDate: this.rootElement.querySelector(
+                ".calendar-currDate"
+            ),
+            modal: this.rootElement.querySelector(".calendar-manage-event"),
+            modalClose: this.rootElement
+                .querySelector(".calendar-manage-event")
+                .querySelector(".close"),
+            modalInputDescription: this.rootElement
+                .querySelector(".calendar-manage-event")
+                .querySelector("#descricao"),
+            modalInputDate: this.rootElement
+                .querySelector(".calendar-manage-event")
+                .querySelector("#date"),
+            modalEventIdShow: this.rootElement
+                .querySelector(".calendar-manage-event")
+                .querySelector(".event-id"),
+            modalOk: this.rootElement
+                .querySelector(".calendar-manage-event")
+                .querySelector("#ok"),
+            modalDelete: this.rootElement
+                .querySelector(".calendar-manage-event")
+                .querySelector("#eliminar")
+        });
     }
 
     /**
@@ -171,7 +117,7 @@ export class View {
      *
      */
     renderCalendarHeader(state) {
-        this.CalendarDOM.calendarCurrDate.innerHTML = `${
+        this.findDOMById("calendarCurrDate").innerHTML = `${
             months[state.viewingDate.getMonth()].full
         } ${state.viewingDate.getFullYear()}`;
     }
@@ -184,7 +130,7 @@ export class View {
     renderCalendar(state) {
         let monthStarted = false;
         let day = 1;
-        for (let tr of this.CalendarDOM.calendarBody.children) {
+        for (let tr of this.findDOMById("calendarBody").children) {
             while (tr.firstChild) tr.removeChild(tr.firstChild);
 
             for (let dayCel = 0; dayCel < 7; dayCel += 1) {
@@ -244,31 +190,17 @@ export class View {
                     divEvents.classList.add("events-td");
                     events.forEach(event => {
                         const divEvent = document.createElement("div");
+                        divEvent.setAttribute("eventId", event.id);
                         divEvent.textContent = event.description;
-                        divEvent.addEventListener("dblclick", () =>
-                            this.controller.manageEvent(event.id)
-                        );
                         divEvents.appendChild(divEvent);
                     });
                     td.appendChild(divEvents);
                 }
 
-                const createEventSpan = document.createElement("span");
-                createEventSpan.innerHTML = `<ion-icon name="add-outline"></ion-icon>`;
-                createEventSpan.classList.add("add-event");
-                const currDay = day;
-                createEventSpan.addEventListener("click", () => {
-                    this.controller.toggleCreateMode();
-                    const now = new Date();
-                    this.CalendarDOM.manageEventModal.inputDate.valueAsNumber = new Date(
-                        state.viewingDate.getFullYear(),
-                        state.viewingDate.getMonth(),
-                        currDay,
-                        now.getHours(),
-                        now.getMinutes()
-                    );
-                });
-                td.appendChild(createEventSpan);
+                const createEventIcon = document.createElement("ion-icon");
+                createEventIcon.classList.add("add-event");
+                createEventIcon.setAttribute("name", "add-outline");
+                td.appendChild(createEventIcon);
 
                 if (isCurrDay) td.classList.add("curr");
 
@@ -288,33 +220,48 @@ export class View {
      *
      */
     renderManageEventModal(state) {
-        this.CalendarDOM.manageEventModal.modal.classList.remove("hidden");
-        this.CalendarDOM.manageEventModal.modal.classList.remove("show");
-        this.CalendarDOM.manageEventModal.delete.style.display = "inline-block";
+        if (!state.isManageModalOpen) {
+            this.findDOMById("modal").classList.add("hidden");
+            this.findDOMById("modal").classList.remove("show");
+            return;
+        }
 
-        if (state.createMode) {
-            this.CalendarDOM.manageEventModal.modal.classList.add("show");
-            this.CalendarDOM.manageEventModal.modal.querySelector(
-                ".event-modal-title"
-            ).textContent = "Criara Evento";
-            this.CalendarDOM.manageEventModal.delete.style.display = "none";
-            this.CalendarDOM.manageEventModal.inputDescription.value = "";
-            this.CalendarDOM.manageEventModal.eventIdShow.textContent = ``;
-        } else if (state.currEventToManageId) {
+        if (state.currEventToManageId) {
             const event = state.events.find(
                 e => e.id === state.currEventToManageId
             );
-            this.CalendarDOM.manageEventModal.modal.classList.add("show");
-            this.CalendarDOM.manageEventModal.modal.querySelector(
+            this.findDOMById("modalDelete").style.display = "inline-block";
+            this.findDOMById("modal").querySelector(
                 ".event-modal-title"
             ).textContent = "Editar Evento";
-            this.CalendarDOM.manageEventModal.eventIdShow.textContent = `@${state.currEventToManageId}`;
-            this.CalendarDOM.manageEventModal.inputDescription.value =
-                event.description;
-            this.CalendarDOM.manageEventModal.inputDate.valueAsNumber = event.at.getTime();
+            this.findDOMById(
+                "modalEventIdShow"
+            ).textContent = `@${state.currEventToManageId}`;
+            this.findDOMById("modalInputDescription").value = event.description;
+            this.findDOMById(
+                "modalInputDate"
+            ).valueAsNumber = event.at.getTime();
         } else {
-            this.CalendarDOM.manageEventModal.modal.classList.add("hidden");
+            this.findDOMById("modal").querySelector(
+                ".event-modal-title"
+            ).textContent = "Criara Evento";
+            this.findDOMById("modalDelete").style.display = "none";
+            this.findDOMById("modalInputDescription").value = "";
+            this.findDOMById("modalEventIdShow").textContent = ``;
         }
+
+        this.findDOMById("modal").classList.add("show");
+        this.findDOMById("modal").classList.remove("hidden");
+    }
+
+    removeEvent(id) {
+        this.findDOMById("calendarBody")
+            .querySelector(`[eventId="${id}"]`)
+            .parentNode.removeChild(
+                this.findDOMById("calendarBody").querySelector(
+                    `[eventId="${id}"]`
+                )
+            );
     }
 
     /**

@@ -5,69 +5,9 @@
  * @property {Date} currDay
  * @property {Date} viewingDate
  * @property {string} currEventToManageId
- * @property {boolean} createMode
+ * @property {boolean} isManageModalOpen
  *
  */
-
-// [
-//     {
-//         id: Math.random()
-//             .toString(32)
-//             .slice(2),
-//         description: "aagsrgsrg",
-//         at: new Date(
-//             this.state.viewingDate.getTime() +
-//                 1 * 24 * 60 * 60 * 1000
-//         )
-//     },
-//     {
-//         id: Math.random()
-//             .toString(32)
-//             .slice(2),
-//         description: "aagsrgsrg",
-//         at: new Date(
-//             this.state.viewingDate.getTime() +
-//                 (Math.random() * 10 + 1) * 24 * 60 * 60 * 1000
-//         )
-//     },
-//     {
-//         id: Math.random()
-//             .toString(32)
-//             .slice(2),
-//         description: "aagfsaefaegfeagaegesrgsrg",
-//         at: new Date(
-//             this.state.viewingDate.getTime() +
-//                 1 * 24 * 60 * 60 * 1000
-//         )
-//     },
-//     {
-//         id: Math.random()
-//             .toString(32)
-//             .slice(2),
-//         description: "aagsrgsrg",
-//         at: new Date(
-//             this.state.viewingDate.getTime() +
-//                 (Math.random() * 10 + 1) * 24 * 60 * 60 * 1000
-//         )
-//     },
-//     {
-//         id: Math.random()
-//             .toString(32)
-//             .slice(2),
-//         description: "aagsrgsrg",
-//         at: this.state.currDay
-//     },
-//     {
-//         id: Math.random()
-//             .toString(32)
-//             .slice(2),
-//         description: "aagsrgsrg",
-//         at: new Date(
-//             this.state.viewingDate.getTime() +
-//                 (Math.random() * 10 + 1) * 24 * 60 * 60 * 1000
-//         )
-//     }
-// ]
 
 export class Model {
     /** @type {State} */
@@ -76,7 +16,7 @@ export class Model {
         currDay: undefined,
         viewingDate: undefined,
         currEventToManageId: undefined,
-        createMode: false
+        isManageModalOpen: false
     };
 
     async init() {
@@ -117,25 +57,22 @@ export class Model {
         this.state.viewingDate = new Date(currentYear, currentMonth);
     }
 
-    toggleEventToManage(id) {
+    setShouldManageModalBeOpen(isOpen) {
+        this.state.isManageModalOpen = isOpen;
+    }
+
+    setEventToManage(id) {
         this.state.currEventToManageId = id;
     }
 
-    deleteEvent() {
-        this.state.events = this.state.events.filter(
-            e => e.id !== this.state.currEventToManageId
-        );
-
-        localStorage.setItem("@events", JSON.stringify(this.state.events));
+    deleteEvent(id) {
+        this.state.events = this.state.events.filter(e => e.id !== id);
+        this.saveEventsInLocalStorage();
     }
 
-    updateEvent({ description, at }) {
-        const event = this.state.events.find(
-            e => e.id === this.state.currEventToManageId
-        );
-        if (!event) return;
+    updateEvent(id, { description, at }) {
         this.state.events = this.state.events.map(e =>
-            e.id !== this.state.currEventToManageId
+            e.id !== id
                 ? e
                 : {
                       ...e,
@@ -143,11 +80,8 @@ export class Model {
                       at: at ? at : e.at
                   }
         );
-        localStorage.setItem("@events", JSON.stringify(this.state.events));
-    }
 
-    toggleCreateMode() {
-        this.state.createMode = !this.state.createMode;
+        this.saveEventsInLocalStorage();
     }
 
     createEvent({ description, at }) {
@@ -158,6 +92,11 @@ export class Model {
             description,
             at
         });
+
+        this.saveEventsInLocalStorage();
+    }
+
+    saveEventsInLocalStorage() {
         localStorage.setItem("@events", JSON.stringify(this.state.events));
     }
 }
