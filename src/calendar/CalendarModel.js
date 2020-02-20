@@ -1,3 +1,5 @@
+import { AbstractModel } from "../core/AbstractModel";
+
 /**
  *
  * @typedef {object} State
@@ -9,7 +11,7 @@
  *
  */
 
-export class CalendarModel {
+export class CalendarModel extends AbstractModel {
     /** @type {State} */
     state = {
         events: [],

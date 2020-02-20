@@ -1,12 +1,12 @@
 import { CalendarView } from "./CalendarView";
+import { AbstractController } from "../core/AbstractController";
 
-export class CalendarController {
-    /** @type {import("./CalendarModel").CalendarModel} */
-    model;
-
-    /** @type {import("./CalendarView").CalendarView} */
-    view;
-
+/**
+ *
+ * @extends {AbstractController<import("./CalendarModel").CalendarModel, import("./CalendarView").CalendarView>}
+ *
+ */
+export class CalendarController extends AbstractController {
     /**
      *
      * @param {import("./CalendarModel").CalendarModel} model
@@ -14,8 +14,7 @@ export class CalendarController {
      *
      */
     constructor(model, view) {
-        this.model = model;
-        this.view = view;
+        super(model, view);
 
         this.moveCalendarNext = this.moveCalendarNext.bind(this);
         this.moveCalendarPrev = this.moveCalendarPrev.bind(this);
@@ -78,6 +77,7 @@ export class CalendarController {
             now.getHours(),
             now.getMinutes()
         ).getTime();
+
         this.model.setEventToManage(undefined);
         this.model.setShouldManageModalBeOpen(true);
         this.view.renderManageEventModal(this.model.state);
