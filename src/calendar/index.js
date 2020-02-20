@@ -1,8 +1,8 @@
 import "./styles.css";
 
-import { Controller } from "./Controller";
-import { Model } from "./Model";
-import { View } from "./View";
+import { CalendarController } from "./CalendarController";
+import { CalendarModel } from "./CalendarModel";
+import { CalendarView } from "./CalendarView";
 
 /**
  *
@@ -10,7 +10,10 @@ import { View } from "./View";
  *
  */
 export async function Calendar(rootEle) {
-    const ctl = new Controller(new Model(), new View(rootEle));
+    const ctl = new CalendarController(
+        new CalendarModel(),
+        new CalendarView(rootEle)
+    );
     await ctl.init();
 
     return ctl;

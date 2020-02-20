@@ -1,14 +1,17 @@
-export class Controller {
-    /** @type {import("./Model").Model} */
+import { CalendarView } from "./CalendarView";
+
+export class CalendarController {
+    /** @type {import("./CalendarModel").CalendarModel} */
     model;
 
-    /** @type {import("./View").View} */
+    /** @type {import("./CalendarView").CalendarView} */
     view;
 
     /**
      *
-     * @param {import("./Model").Model} model
-     * @param {import("./View").View} view
+     * @param {import("./CalendarModel").CalendarModel} model
+     * @param {import("./CalendarView").CalendarView} view
+     *
      */
     constructor(model, view) {
         this.model = model;
@@ -33,29 +36,34 @@ export class Controller {
 
     bindEvents() {
         this.view
-            .findDOMById("calendarPrev")
+            .findDOMById(CalendarView.DOMKeys.calendarPrev)
             .addEventListener("click", this.moveCalendarPrev);
         this.view
-            .findDOMById("calendarNext")
+            .findDOMById(CalendarView.DOMKeys.calendarNext)
             .addEventListener("click", this.moveCalendarNext);
         this.view
-            .findDOMById("modalClose")
+            .findDOMById(CalendarView.DOMKeys.modalClose)
             .addEventListener("click", this.onEventManagerClose);
         this.view
-            .findDOMById("modalDelete")
+            .findDOMById(CalendarView.DOMKeys.modalDelete)
             .addEventListener("click", this.onDeleteEvent);
         this.view
-            .findDOMById("modalOk")
+            .findDOMById(CalendarView.DOMKeys.modalOk)
             .addEventListener("click", this.onEventManagerConfirm);
         this.view
-            .findDOMById("calendarBody")
+            .findDOMById(CalendarView.DOMKeys.calendarBody)
             .addEventListener("click", this.onShowCreateModal);
 
         this.view
-            .findDOMById("calendarBody")
+            .findDOMById(CalendarView.DOMKeys.calendarBody)
             .addEventListener("dblclick", this.onShowEditModal);
     }
 
+    /**
+     *
+     * @param {MouseEvent} e
+     *
+     */
     onShowCreateModal(e) {
         if (this.model.state.isManageModalOpen) return;
         if (!e.target.classList.contains("add-event")) return;
@@ -75,6 +83,11 @@ export class Controller {
         this.view.renderManageEventModal(this.model.state);
     }
 
+    /**
+     *
+     * @param {MouseEvent} e
+     *
+     */
     onShowEditModal(e) {
         if (this.model.state.isManageModalOpen) return;
         if (!e.target.hasAttribute("eventId")) return;
@@ -87,9 +100,12 @@ export class Controller {
     }
 
     onEventManagerConfirm() {
-        const description = this.view.findDOMById("modalInputDescription")
-            .value;
-        const at = new Date(this.view.findDOMById("modalInputDate").value);
+        const description = this.view.findDOMById(
+            CalendarView.DOMKeys.modalInputDescription
+        ).value;
+        const at = new Date(
+            this.view.findDOMById(CalendarView.DOMKeys.modalInputDate).value
+        );
         if (this.model.state.currEventToManageId) {
             this.model.updateEvent(this.model.state.currEventToManageId, {
                 description,

@@ -9,7 +9,7 @@
  *
  */
 
-export class Model {
+export class CalendarModel {
     /** @type {State} */
     state = {
         events: [],

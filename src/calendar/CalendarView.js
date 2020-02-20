@@ -1,7 +1,23 @@
 import { months, firstDay, daysInMonth } from "../utils";
 import { AbstractView } from "../core/AbstractView";
 
-export class View extends AbstractView {
+export class CalendarView extends AbstractView {
+    static DOMKeys = {
+        calendarTable: "calendarTable",
+        calendarHead: "calendarHead",
+        calendarBody: "calendarBody",
+        calendarPrev: "calendarPrev",
+        calendarNext: "calendarNext",
+        calendarCurrDate: "calendarCurrDate",
+        modal: "modal",
+        modalClose: "modalClose",
+        modalInputDescription: "modalInputDescription",
+        modalInputDate: "modalInputDate",
+        modalEventIdShow: "modalEventIdShow",
+        modalOk: "modalOk",
+        modalDelete: "modalDelete"
+    };
+
     async init() {
         this.initRenderApp();
         this.populateCalendarDom();
@@ -113,7 +129,7 @@ export class View extends AbstractView {
 
     /**
      *
-     * @param {import("./Model").State} state
+     * @param {import("./CalendarModel").State} state
      *
      */
     renderCalendarHeader(state) {
@@ -124,7 +140,7 @@ export class View extends AbstractView {
 
     /**
      *
-     * @param {import("./Model").State} state
+     * @param {import("./CalendarModel").State} state
      *
      */
     renderCalendar(state) {
@@ -216,7 +232,7 @@ export class View extends AbstractView {
 
     /**
      *
-     * @param {import("./Model").State} state
+     * @param {import("./CalendarModel").State} state
      *
      */
     renderManageEventModal(state) {
@@ -254,6 +270,11 @@ export class View extends AbstractView {
         this.findDOMById("modal").classList.remove("hidden");
     }
 
+    /**
+     *
+     * @param {string} id
+     *
+     */
     removeEvent(id) {
         this.findDOMById("calendarBody")
             .querySelector(`[eventId="${id}"]`)
@@ -266,7 +287,7 @@ export class View extends AbstractView {
 
     /**
      *
-     * @param {import("./Model").State} state
+     * @param {import("./CalendarModel").State} state
      *
      */
     render(state) {
